@@ -7,12 +7,18 @@ import {NavigationActions} from 'react-navigation';
 import {Service} from '../../../services';
 import ReactMoment from 'react-moment';
 import Moment from 'moment';
-import {Avatar} from '../../../components';
+import {Avatar} from '../../../components/userAvatar';
 
+const SPEAKER_TABLE = 'Attendee';
 export default class ScheduleTile extends RkComponent {
 
     constructor(props) {
         super(props);
+        this.state={
+            session : {
+                speakers : []
+            }
+        }
     }
 
     onShowDetails = (event) => {
@@ -26,42 +32,74 @@ export default class ScheduleTile extends RkComponent {
     onAttendRequest = (event) => {
         Alert.alert('Added to agenda');
     }
+    getSpeakerDetails = (speakerId)=>{
+        var docRef = Service.getDocRef(SPEAKER_TABLE).doc(speakerId);
+        docRef.get().then(function(doc) {
+            if (doc.exists) {
+                return doc.data();
+            }else{
+                return {
+                    firstName : 'no ref'
+                }
+            }
+        }).catch(function(error) {
+            return {
+                firstName : 'error'
+            }
+        });
+    }
+    componentDidMount(){
+        this.setState({
+            session : this.props.session
+        });
+        this.props.session.speakers.forEach((session) =>{
+            
+        });
+    }
     /**
         * Render Schedule Tile
         */
     render() {
-        if (this.props.session) {
-            const speakers = this
-                .props
+        let speakers = <Text>Speakers</Text>
+        if (this.state.session.speakers.length > 0) {
+            speakers = this
+                .state
                 .session
                 .speakers
                 .map((speaker, index) => {
-                    let avatar;
-                    if (speaker.image) {
-                        avatar = <Image style={image} source={this.props.img}/>
-                    } else {
-                        let firstLetter = speaker[0];
-                        avatar = <Text style={styles.avatar}>{firstLetter}</Text>
+                    if(speaker.firstName){
+                        let avatar = <Avatar image={ speaker.profileImage} name= {speaker.firstName} />;
+                        return (
+                           <TouchableOpacity
+                                key={index}
+                                onPress={() => this.props.navigation.navigate('ProfileV1')}
+                                style={{
+                                flexDirection: 'row'
+                            }}>
+                                
+                                <Text style={styles.speakerName}>{speaker.firstName}</Text>
+                            </TouchableOpacity> 
+                        );
+                    }else{
+                        return (
+                            <TouchableOpacity
+                                    key={index}
+                                    onPress={() => this.props.navigation.navigate('ProfileV1')}
+                                    style={{
+                                    flexDirection: 'row'
+                                }}>
+                                <Text>{speaker}</Text>
+                            </TouchableOpacity>
+                        );
                     }
-                    return (
-                        <TouchableOpacity
-                            key={index}
-                            onPress={() => this.props.navigation.navigate('AttendeeProfile', {id: speaker})}
-                            style={{
-                            flexDirection: 'row'
-                        }}>
-                            {avatar}
-                            <Text style={styles.speakerName}>{speaker}</Text>
-                        </TouchableOpacity>
-                    )
                 });
             const startTime = this
-                .props
+                .state
                 .session
                 .startTime
                 .toString();
             const endTime = this
-                .props
+                .state
                 .session
                 .endTime
                 .toString();
@@ -70,7 +108,9 @@ export default class ScheduleTile extends RkComponent {
                     <View rkCardHeader style = {styles.header}> 
                         <Text style={styles.roomName}>{this.props.session.room}</Text>
                         <View style={styles.mainHeader}>
-                            <Text style={styles.headerText}>{this.props.session.key}</Text> 
+                            <TouchableOpacity onPress={() => this.props.navigation.navigate('SessionDetails', {id: this.props.session.key, session: this.props.session})}>
+                                <Text style={styles.headerText}>{this.props.session.eventName}</Text> 
+                            </TouchableOpacity>
                             <RkButton rkType = 'success small' style ={styles.actionBtn} onPress={this.onAttendRequest}> Attend </RkButton>
                         </View>
                     </View >

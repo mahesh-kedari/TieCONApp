@@ -6,6 +6,7 @@ import Moment from 'moment';
 
 import {Service} from '../../../services';
 
+const TABLE_NAME = 'Sessions';
 /**
  *
  */
@@ -37,7 +38,7 @@ export default class Schedule extends React.Component {
      *
      */
     fetchSessionList = () => {
-        Service.addSnapshotListener('Event', (snapshot) => {
+        Service.addSnapshotListener(TABLE_NAME, (snapshot) => {
             const sessionList = [];
             snapshot.forEach((event) => {
                 const {

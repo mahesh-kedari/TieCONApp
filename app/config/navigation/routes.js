@@ -51,6 +51,11 @@ export const MainRoutes = [
         title: 'Profile',
         screen: Screens.AttendeeProfile,
         children: []
+      },{
+        id: 'SessionDetails',
+        title: 'Session Details',
+        screen : Screens.SessionDetails,
+        children : []
       }
     ]
   },
